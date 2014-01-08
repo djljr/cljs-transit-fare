@@ -7,4 +7,4 @@ goog.addDependency("../cljs/core/async/impl/dispatch.js", ['cljs.core.async.impl
 goog.addDependency("../cljs/core/async/impl/channels.js", ['cljs.core.async.impl.channels'], ['cljs.core.async.impl.buffers', 'cljs.core', 'cljs.core.async.impl.dispatch', 'cljs.core.async.impl.protocols']);
 goog.addDependency("../cljs/core/async/impl/timers.js", ['cljs.core.async.impl.timers'], ['cljs.core', 'cljs.core.async.impl.channels', 'cljs.core.async.impl.dispatch', 'cljs.core.async.impl.protocols']);
 goog.addDependency("../cljs/core/async.js", ['cljs.core.async'], ['cljs.core.async.impl.ioc_helpers', 'cljs.core.async.impl.buffers', 'cljs.core', 'cljs.core.async.impl.channels', 'cljs.core.async.impl.dispatch', 'cljs.core.async.impl.protocols', 'cljs.core.async.impl.timers']);
-goog.addDependency("../djljr/fare/core.js", ['djljr.fare.core'], ['cljs.core', 'goog.dom', 'cljs.core.async', 'goog.date', 'goog.events']);
+goog.addDependency("../djljr/fare/core.js", ['djljr.fare.core'], ['cljs.core', 'goog.dom', 'goog.i18n.DateTimeFormat', 'goog.i18n.DateTimeParse', 'cljs.core.async', 'goog.date', 'goog.events']);
