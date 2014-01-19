@@ -26,7 +26,8 @@
                   :start-date (now-string) 
                   :holiday #{"2014-01-01" "2014-01-20" "2014-05-26" "2014-07-04" "2014-09-01" "2014-11-27" "2014-11-28" "2014-12-24" "2014-12-25" "2014-12-26"} 
                   :vacation #{} 
-                  :travel-days #{}}))
+                  :travel-days #{}
+                  :extra-trips 0}))
 
 (defn load []
   (let [state-string (.get goog.net.cookies "state")]
@@ -128,9 +129,17 @@
 
 (defn update []
   (let [current @state
-        last-day-forty-trip (date-string (last (take 20 (trip-days (days (date-obj (:start-date current)))))))]
+        trip-days-forty-trip (/ (- 40 (js/parseInt (:extra-trips current))) 2)
+        last-day-forty-trip (date-string (last (take trip-days-forty-trip (trip-days (days (date-obj (:start-date current)))))))
+        thirty-days (last (take 30 (iterate add-one (date-obj (:start-date current)))))
+        trip-days-thirty-day (take-while #(>= 0 (.compare date/Date % thirty-days)) (trip-days (days (date-obj (:start-date current)))))
+        trips-thirty-day (* 2 (count trip-days-thirty-day))]
   	(set! (.-innerHTML (dom/getElement "thirty-day-result")) (.toFixed (/ (:thirty-day-price current) 30) 2))
   	(set! (.-innerHTML (dom/getElement "forty-trip-result")) (.toFixed (/ (:forty-trip-price current) (days-between (:start-date current) last-day-forty-trip)) 2))
+    (set! (.-innerHTML (dom/getElement "thirty-day-result-trip")) (.toFixed (/ (:thirty-day-price current) trips-thirty-day) 2))
+    (set! (.-innerHTML (dom/getElement "forty-trip-result-trip")) (.toFixed (/ (:forty-trip-price current) 40) 2))
+    (set! (.-innerHTML (dom/getElement "last-day-40-trip")) last-day-forty-trip)
+    (set! (.-innerHTML (dom/getElement "last-day-30-day")) (date-string (last trip-days-thirty-day)))
     (display-set :vacation (get current :vacation) (dom/getElement ":vacation-days"))
     (display-set :holiday (get current :holiday) (dom/getElement ":holiday-days"))
     (save current)))
@@ -140,6 +149,7 @@
     (set! (.-value (dom/getElement "start-date")) (:start-date current))
     (set! (.-value (dom/getElement "thirty-day-price")) (:thirty-day-price current))
     (set! (.-value (dom/getElement "forty-trip-price")) (:forty-trip-price current))
+    (set! (.-value (dom/getElement "extra-trips")) (:extra-trips current))
     (update)))
 
 
@@ -147,6 +157,7 @@
 (listen-assoc (dom/getElement "start-date") :start-date)
 (listen-assoc (dom/getElement "thirty-day-price") :thirty-day-price)
 (listen-assoc (dom/getElement "forty-trip-price") :forty-trip-price)
+(listen-assoc (dom/getElement "extra-trips") :extra-trips)
 (listen-append (dom/getElement "add-vacation-day") (dom/getElement "vacation-day") :vacation)
 (listen-append (dom/getElement "add-holiday-day") (dom/getElement "holiday-day") :holiday)
 (load)
