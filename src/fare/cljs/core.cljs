@@ -11,7 +11,6 @@
 
 (re/register-handler
  :initialize
- re/debug
  (fn [db _]
    (merge db s/initial-state)))
 
@@ -23,6 +22,7 @@
 
 (re/register-handler
  :add-day
+ re/debug
  (fn [db [_ field day]]
    (update db field conj day)))
 
@@ -44,14 +44,14 @@
       #{"text" "email" "password" "number" "radio" "textarea" "select-one" "select-multiple" "date"}
       (.-value target))))
 
-(defn input [{:keys [pre label id type value post read-only?] :as opts}]
+(defn input [{:keys [pre label id type value post read-only? placeholder] :as opts}]
   [:div.form-group
    [:label.col-sm-4.control-label {:for id} (str label ":")]
    [:div.input-group.col-sm-7
     (if pre [:span.input-group-addon pre])
     (if read-only?
       [:p.form-control-static value]
-      [:input.form-control {:id id :type type :value value
+      [:input.form-control {:id id :type type :value value :placeholder placeholder
                             :on-change (fn [e]
                                          (re/dispatch
                                           [:field-change
@@ -60,42 +60,58 @@
     (if post [:span.input-group-addon post])]])
 
 (defn root []
-  (let [app-state (re/subscribe [:field-values])]
+  (let [app-state (re/subscribe [:field-values])
+        thirty-day-result (re/subscribe [:thirty-day-result])
+        forty-trip-result (re/subscribe [:forty-trip-result])
+        thirty-day-result-trip (re/subscribe [:thirty-day-result-trip])
+        forty-trip-result-trip (re/subscribe [:forty-trip-result-trip])
+        last-day-thirty-day (re/subscribe [:last-day-thirty-day])
+        last-day-forty-trip (re/subscribe [:last-day-forty-trip])]
     (fn []
       [:div.col-md-6 {:role "main"}
        [:h1 "Transit Pass Calculator"]
        [:div.inputs
         [:div.form-horizontal
-         (input {:label "Start Date" :id "start-date"
-                 :type "date" :value (:start-date @app-state)})
+         (input {:label "Start Date" :id "start-date" :placeholder "yyyy-mm-dd"
+                 :value (:start-date @app-state)})
          (input {:label "30 Day Price" :id "thirty-day-price" :pre "$"
                  :type "number" :value (:thirty-day-price @app-state)})
          (input {:label "40 Trip Price" :id "forty-trip-price" :pre "$"
                  :type "number" :value (:forty-trip-price @app-state)})
-         (input {:label "Vacation" :id "vacation"
-                 :type "date" :post [:button {:type "button"} "Add"]})
+         (input {:label "Vacation" :id "vacation" :placeholder "yyyy-mm-dd"
+                 :value (:vacation @app-state)
+                 :post [:button {:on-click
+                                 (fn [e]
+                                   (re/dispatch
+                                    [:add-day :vacation-list (:vacation @app-state)]))
+                                 :type "button"} "Add"]})
          [:div.input-group.col-sm-7
           [:span.label.label-default "2014-01-01"]]
-         (input {:label "Holidays" :id "holiday"
-                 :type "date" :post [:button {:type "button"} "Add"]})
+         (input {:label "Holidays" :id "holiday" :placeholder "yyyy-mm-dd"
+                 :value (:holiday @app-state)
+                 :post [:button {:on-click
+                                 (fn [e]
+                                   (re/dispatch
+                                    [:add-day :holiday-list (:holiday @app-state)]))
+                                 :type "button"} "Add"]})
          [:div.input-group.col-sm-7
           [:span.label.label-default "2014-01-01"]]
          (input {:label "Additional Trips" :id "extra-trips"
-                 :type "number" :value (:additional-trips @s/app-state)})]]
+                 :type "number" :value (:extra-trips @app-state)})]]
        [:div.output
         [:div.form-horizontal
          (input {:label "$/Day 30 Day" :pre "$"
-                 :value @c/thirty-day-result :read-only? true})
+                 :value @thirty-day-result :read-only? true})
          (input {:label "$/Day 40 Trip" :pre "$"
-                 :value @c/forty-trip-result :read-only? true})
+                 :value @forty-trip-result :read-only? true})
          (input {:label "$/Trip 30 Day" :pre "$"
-                 :value @c/thirty-day-result-trip :read-only? true})
+                 :value @thirty-day-result-trip :read-only? true})
          (input {:label "$/Trip 40 Trip" :pre "$"
-                 :value @c/forty-trip-result-trip :read-only? true})
+                 :value @forty-trip-result-trip :read-only? true})
          (input {:label "Last Day 30 Day"
-                 :value @c/last-day-thirty-day :read-only? true})
+                 :value @last-day-thirty-day :read-only? true})
          (input {:label "Last Day 40 Trip"
-                 :value @c/last-day-forty-trip :read-only? true})]]])))
+                 :value @last-day-forty-trip :read-only? true})]]])))
 
 (defn mount-root []
   (re/dispatch-sync [:initialize])
