@@ -1,5 +1,6 @@
 out/
 target/
+resources/public/js/compiled
 transit_calc.js
 .lein-failures
 .nrepl-port

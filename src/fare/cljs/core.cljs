@@ -1,7 +1,9 @@
 (ns fare.core
-  (:require-macros [cljs.core.async.macros :refer [go]])
+  (:require-macros [cljs.core.async.macros :refer [go]]
+                   [reagent.ratom :refer [reaction]])
   (:refer-clojure :exclude [format])
-  (:require [goog.dom :as dom]
+  (:require [reagent.core :as reagent :refer [atom]]
+            [goog.dom :as dom]
             [goog.events :as events]
             [goog.date :as date]
             [goog.net.cookies :as cks]
@@ -11,8 +13,92 @@
             [cljs.reader :as reader]
             [clojure.string :refer [join]]))
 
+(def app-state (atom {:start-date "2015-12-01"
+                      :thirty-day-price "83"
+                      :forty-trip-price "90"}))
+
+(def thirty-day-result (reaction (:thirty-day-price @app-state)))
+(def forty-trip-result (reaction (:forty-trip-price @app-state)))
+(def thirty-day-result-trip (reaction (:thirty-day-price @app-state)))
+(def forty-trip-result-trip (reaction (:forty-trip-price @app-state)))
+(def last-day-thirty-day (reaction (:start-date @app-state)))
+(def last-day-forty-trip (reaction (:start-date @app-state)))
+
+(defn root []
+  [:div.col-md-6 {:role "main"}
+   [:h1 "Transit Pass Calculator"]
+   [:div.inputs
+    [:div.form-horizontal
+     [:div.form-group
+      [:label.col-sm-4.control-label {:for "start-date"} "Start Date:"]
+      [:div.input-group.col-sm-7
+       [:input.form-control {:type "date" :value (:start-date @app-state)}]]]
+     [:div.form-group
+      [:label.col-sm-4.control-label {:for "thirty-day-price"} "30 Day Price:"]
+      [:div.input-group.col-sm-7
+       [:span.input-group-addon "$"]
+       [:input.form-control {:type "number" :value (:thirty-day-price @app-state)}]]]
+     [:div.form-group
+      [:label.col-sm-4.control-label {:for "forty-trip-price"} "40 Trip Price:"]
+      [:div.input-group.col-sm-7
+       [:span.input-group-addon "$"]
+       [:input.form-control {:type "number" :value (:forty-trip-price @app-state)}]]]
+     [:div.form-group
+      [:label.col-sm-4.control-label {:for "vacation"} "Vacation:"]
+      [:div.input-group.col-sm-7
+       [:input.form-control {:type "date"}]
+       [:span.input-group-addon
+        [:button {:type "button"} "Add"]]]
+      [:div.input-group.col-sm-7]]
+     [:div.form-group
+      [:label.col-sm-4.control-label {:for "holiday"} "Holidays:"]
+      [:div.input-group.col-sm-7
+       [:input.form-control {:type "date"}]
+       [:span.input-group-addon
+        [:button {:type "button"} "Add"]]]
+      [:div.input-group.col-sm-7
+       [:span.label.label-default "2014-01-01"]]]
+     [:div.form-group
+      [:label.col-sm-4.control-label {:for "extra-trips"} "Additional Trips:"]
+      [:div.input-group.col-sm-7
+       [:input.form-control {:type "number" :value (:additional-trips @app-state)}]]]]]
+   [:div.output
+    [:div.form-horizontal
+     [:div.form-group
+      [:label.col-sm-4.control-label "$/Day 30 Day"]
+      [:div.input-group.col-sm-7
+       [:span.input-group-addon "$"]
+       [:p.form-control-static @thirty-day-result]]]
+     [:div.form-group
+      [:label.col-sm-4.control-label "$/Day 40 Trip"]
+      [:div.input-group.col-sm-7
+       [:span.input-group-addon "$"]
+       [:p.form-control-static @forty-trip-result]]]
+     [:div.form-group
+      [:label.col-sm-4.control-label "$/Trip 30 Day"]
+      [:div.input-group.col-sm-7
+       [:span.input-group-addon "$"]
+       [:p.form-control-static @thirty-day-result-trip]]]
+     [:div.form-group
+      [:label.col-sm-4.control-label "$/Trip 40 Trip"]
+      [:div.input-group.col-sm-7
+       [:span.input-group-addon "$"]
+       [:p.form-control-static @forty-trip-result-trip]]]
+     [:div.form-group
+      [:label.col-sm-4.control-label "Last Day 30 Day"]
+      [:div.input-group.col-sm-7
+       [:p.form-control-static @last-day-thirty-day]]]
+     [:div.form-group
+      [:label.col-sm-4.control-label "Last Day 40 Trip"]
+      [:div.input-group.col-sm-7
+       [:p.form-control-static @last-day-forty-trip]]]]]])
+
 (defn mount-root []
-  nil)
+  (reagent/render-component
+   [root]
+   (. js/document (getElementById "app")))  )
+
+(mount-root)
 
 
 (defn date-string [d]
@@ -81,88 +167,17 @@
         days-bet (take-while before (days start-date))]
     (count days-bet)))
 
-(declare update)
-
-(defn listen [el type]
-  (let [out (chan)]
-    (events/listen el type
-                   (fn [e] (put! out e)))
-    out))
-
-(defn listen-assoc [el key]
-  (let [text (listen el "change")]
-    (go 
-      (while true
-        (let [event (<! text)]
-          (swap! state assoc key (-> event .-target .-value))
-          (update))))))
-
-(defn append [st key value]
-  (assoc st key (conj (get st key) value)))
-
-(defn disjunct [st key value]
-  (assoc st key (disj (get st key) value)))
-
-(defn listen-append [btn el key]
-  (let [add-btn (listen btn "click")]
-    (go
-      (while true
-        (let [event (<! add-btn)]
-          (swap! state append key (-> el .-value))
-          (update))))))
-
-(defn set-remove [li key]
-  (let [chan (listen li "click")]
-    (go
-      (while true
-      	(let [event (<! chan)]
-         (swap! state disjunct key (-> li .-innerHTML))
-         (update))))))
-
-(defn make-li [value]
-  (let [item (dom/createDom "span" (clj->js {"class" "label label-default"}))]
-    (set! (.-innerHTML item) value)
-    item))
-
-(defn display-set [key s display]
-  (let [lis (into-array (map make-li (sort s)))]
-  	(doseq [li lis]
-  		(set-remove li key))
-  	(dom/removeChildren display)
-  	(dom/replaceNode (dom/createDom "div" (clj->js {"class" "input-group col-sm-7" "id" (str key "-days")}) lis) display)))
-
-(defn update []
+(defn update-fn []
   (let [current @state
         trip-days-forty-trip (/ (- 40 (js/parseInt (:extra-trips current))) 2)
         last-day-forty-trip (date-string (last (take trip-days-forty-trip (trip-days (days (date-obj (:start-date current)))))))
         thirty-days (last (take 30 (iterate add-one (date-obj (:start-date current)))))
         trip-days-thirty-day (take-while #(>= 0 (.compare date/Date % thirty-days)) (trip-days (days (date-obj (:start-date current)))))
         trips-thirty-day (* 2 (count trip-days-thirty-day))]
-  	(set! (.-innerHTML (dom/getElement "thirty-day-result")) (.toFixed (/ (:thirty-day-price current) 30) 2))
-  	(set! (.-innerHTML (dom/getElement "forty-trip-result")) (.toFixed (/ (:forty-trip-price current) (days-between (:start-date current) last-day-forty-trip)) 2))
-    (set! (.-innerHTML (dom/getElement "thirty-day-result-trip")) (.toFixed (/ (:thirty-day-price current) trips-thirty-day) 2))
-    (set! (.-innerHTML (dom/getElement "forty-trip-result-trip")) (.toFixed (/ (:forty-trip-price current) 40) 2))
-    (set! (.-innerHTML (dom/getElement "last-day-40-trip")) last-day-forty-trip)
-    (set! (.-innerHTML (dom/getElement "last-day-30-day")) (date-string (last trip-days-thirty-day)))
-    (display-set :vacation (get current :vacation) (dom/getElement ":vacation-days"))
-    (display-set :holiday (get current :holiday) (dom/getElement ":holiday-days"))
+    {:thirty-day-result (.toFixed (/ (:thirty-day-price current) 30) 2)
+     :forty-trip-result (.toFixed (/ (:forty-trip-price current) (days-between (:start-date current) last-day-forty-trip)) 2)
+     :thirty-day-result-trip (.toFixed (/ (:thirty-day-price current) trips-thirty-day) 2)
+     :forty-trip-result-trip (.toFixed (/ (:forty-trip-price current) 40) 2)
+     :last-day-forty-trip last-day-forty-trip
+     :last-day-thirty-trip (date-string (last trip-days-thirty-day))}
     (save current)))
-
-(defn init []
-  (let [current @state]
-    (set! (.-value (dom/getElement "start-date")) (:start-date current))
-    (set! (.-value (dom/getElement "thirty-day-price")) (:thirty-day-price current))
-    (set! (.-value (dom/getElement "forty-trip-price")) (:forty-trip-price current))
-    (set! (.-value (dom/getElement "extra-trips")) (:extra-trips current))
-    (update)))
-
-
-
-(listen-assoc (dom/getElement "start-date") :start-date)
-(listen-assoc (dom/getElement "thirty-day-price") :thirty-day-price)
-(listen-assoc (dom/getElement "forty-trip-price") :forty-trip-price)
-(listen-assoc (dom/getElement "extra-trips") :extra-trips)
-(listen-append (dom/getElement "add-vacation-day") (dom/getElement "vacation-day") :vacation)
-(listen-append (dom/getElement "add-holiday-day") (dom/getElement "holiday-day") :holiday)
-(load)
-(init)
