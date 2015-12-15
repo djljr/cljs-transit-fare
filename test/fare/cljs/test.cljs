@@ -1,8 +1,8 @@
-(ns djljr.fare.core.test
+(ns fare.core.test
   (:require-macros [cemerick.cljs.test :refer (deftest are is testing)])
   (:require [cemerick.cljs.test :as t]
             [goog.date :as date]
-            [djljr.fare.core :refer [is-weekday?]]))
+            [fare.core :refer [is-weekday?]]))
 
 (deftest is-weekday-test
   (testing "djljr.fare.core.is-weekday?"

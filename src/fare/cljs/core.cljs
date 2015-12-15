@@ -1,4 +1,4 @@
-(ns djljr.fare.core
+(ns fare.core
   (:require-macros [cljs.core.async.macros :refer [go]])
   (:refer-clojure :exclude [format])
   (:require [goog.dom :as dom]
@@ -10,6 +10,10 @@
             [cljs.core.async :refer [put! chan <!]]
             [cljs.reader :as reader]
             [clojure.string :refer [join]]))
+
+(defn mount-root []
+  nil)
+
 
 (defn date-string [d]
   (.format (goog.i18n.DateTimeFormat. "yyyy-MM-dd") d))

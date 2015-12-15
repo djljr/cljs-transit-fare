@@ -2,3 +2,6 @@ out/
 target/
 transit_calc.js
 .lein-failures
+.nrepl-port
+figwheel_server.log
+.lein-repl-history

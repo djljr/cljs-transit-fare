@@ -2,29 +2,27 @@
   :description "Web page to figure out monthly vs. trip fares"
   :url "http://transit-fare.djljr.com"
 
-  :dependencies [[org.clojure/clojure "1.5.1"]
-                 [org.clojure/clojurescript "0.0-2138"]
-                 [org.clojure/core.async "0.1.267.0-0d7780-alpha"]]
+  :dependencies [[org.clojure/clojure "1.7.0"]
+                 [org.clojure/clojurescript "1.7.170"]
+                 [org.clojure/core.async "0.2.374"]]
 
-  :plugins [[lein-cljsbuild "1.0.1"]
-            [com.cemerick/clojurescript.test "0.2.1"]]
+  :plugins [[lein-figwheel "0.5.0-2"]]
 
   :source-paths ["src"]
+  :clean-targets ^{:protect false} ["resources/public/js" :target]
   :test-paths ["test"]
 
+  :profiles {:dev
+             {:dependencies [[com.cemerick/piggieback "0.2.1"]
+                             [figwheel-sidecar "0.5.0-2"]]}
+             :repl {:plugins [[cider/cider-nrepl "0.9.1"]]}}
+  
+  :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
   :cljsbuild { 
-    :builds [{:id "fare"
-              :source-paths ["src"]
-              :compiler {
-                :output-to "fare.js"
-                :output-dir "out"
-                :optimizations :none
-                :source-map true}}
-             {:id "fare-test"
-              :source-paths ["src", "test"]
-              :compiler {
-                :output-to "out/test/fare.js"
-                :optimizations :whitespace
-                :pretty-print false}}]
-    :test-commands {"unit-tests" ["phantomjs" :runner
-                                  "out/test/fare.js"]}})
+    :builds [{:id "dev"
+              :source-paths ["src/"]
+              :figwheel {:on-jsload "fare.core/mount-root"}
+              :compiler {:main "fare.core"
+                         :asset-path "js/out"
+                         :output-to "resources/public/js/fare.js"
+                         :outpur-dir "resources/public/js/out"}}]})
