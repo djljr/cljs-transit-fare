@@ -16,27 +16,25 @@
 
 
 (defn is-weekday? [d]
+  (println "is-weekday" d)
   (not (contains? #{5 6} (.getIsoWeekday d))))
 
 (defn is-not-holiday? [d state]
-  (not (contains? (:holiday state) (date-string d))))
+  (not (contains? (:holiday-list state) (date-string d))))
 
 (defn is-not-vacation? [d state]
-  (not (contains? (:vacation state) (date-string d))))
+  (not (contains? (:vacation-list state) (date-string d))))
 
 (defn is-workday? [d state]
   (and (is-weekday? d)
        (is-not-holiday? d state)
        (is-not-vacation? d state)))
 
-(defn is-travel-day? [d state]
-  (contains? (:travel-days state) (date-string d)))
+(defn is-trip-day-filter? [state]
+  (fn [day] (is-workday? day state)))
 
-(defn is-trip-day? [d state]
-  (or (is-workday? d state) (is-travel-day? d state)))
-
-(defn trip-days [days]
-  (filter is-trip-day? days))
+(defn trip-days [state days]
+  (filter (is-trip-day-filter? state) days))
 
 (def one-day (date/Interval. date/Interval.DAYS 1))
 

@@ -15,7 +15,7 @@
     (->> (:start-date app-state)
          d/date-obj
          d/days
-         d/trip-days
+         (d/trip-days app-state)
          (take-while take-fn))))
 
 (defn last-day-thirty-day [app-state]
@@ -35,7 +35,9 @@
 
 (defn last-day-forty-trip [app-state]
   (-> (trip-days-forty-trip app-state)
-        (take (d/trip-days (d/days (d/date-obj (:start-date app-state)))))
+        (take (d/trip-days
+               app-state
+               (d/days (d/date-obj (:start-date app-state)))))
         last
         d/date-string))
 

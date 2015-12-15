@@ -26,6 +26,12 @@
  (fn [db [_ field day]]
    (update db field conj day)))
 
+(re/register-handler
+ :remove-day
+ re/debug
+ (fn [db [_ field day]]
+   (update db field disj day)))
+
 (re/register-sub
  :field-values
  (fn [db _]
@@ -59,6 +65,13 @@
                                            (get-event-value e)]))}])
     (if post [:span.input-group-addon post])]])
 
+(defn date-pill [field]
+  (fn [day]
+    ^{:key [field day]}
+    [:span.label.label-default
+     {:on-click (fn [e] (re/dispatch [:remove-day field day]))}
+     day]))
+
 (defn root []
   (let [app-state (re/subscribe [:field-values])
         thirty-day-result (re/subscribe [:thirty-day-result])
@@ -85,8 +98,10 @@
                                    (re/dispatch
                                     [:add-day :vacation-list (:vacation @app-state)]))
                                  :type "button"} "Add"]})
-         [:div.input-group.col-sm-7
-          [:span.label.label-default "2014-01-01"]]
+         [:div.form-group
+          [:div.col-sm-4]
+          [:div.input-group.col-sm-7
+           (map (date-pill :vacation-list) (:vacation-list @app-state))]]
          (input {:label "Holidays" :id "holiday" :placeholder "yyyy-mm-dd"
                  :value (:holiday @app-state)
                  :post [:button {:on-click
@@ -94,8 +109,10 @@
                                    (re/dispatch
                                     [:add-day :holiday-list (:holiday @app-state)]))
                                  :type "button"} "Add"]})
-         [:div.input-group.col-sm-7
-          [:span.label.label-default "2014-01-01"]]
+         [:div.form-group
+          [:div.col-sm-4]
+          [:div.input-group.col-sm-7
+           (map (date-pill :holiday-list) (:holiday-list @app-state))]]
          (input {:label "Additional Trips" :id "extra-trips"
                  :type "number" :value (:extra-trips @app-state)})]]
        [:div.output
