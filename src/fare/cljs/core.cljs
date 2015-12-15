@@ -24,74 +24,51 @@
 (def last-day-thirty-day (reaction (:start-date @app-state)))
 (def last-day-forty-trip (reaction (:start-date @app-state)))
 
+(defn input [{:keys [pre label id type value post read-only?] :as opts}]
+  [:div.form-group
+   [:label.col-sm-4.control-label {:for id} (str label ":")]
+   [:div.input-group.col-sm-7
+    (if pre [:span.input-group-addon pre])
+    (if read-only?
+      [:p.form-control-static value]
+      [:input.form-control {:id id :type type :value value}])
+    (if post [:span.input-group-addon post])]])
+
 (defn root []
   [:div.col-md-6 {:role "main"}
    [:h1 "Transit Pass Calculator"]
    [:div.inputs
     [:div.form-horizontal
-     [:div.form-group
-      [:label.col-sm-4.control-label {:for "start-date"} "Start Date:"]
-      [:div.input-group.col-sm-7
-       [:input.form-control {:type "date" :value (:start-date @app-state)}]]]
-     [:div.form-group
-      [:label.col-sm-4.control-label {:for "thirty-day-price"} "30 Day Price:"]
-      [:div.input-group.col-sm-7
-       [:span.input-group-addon "$"]
-       [:input.form-control {:type "number" :value (:thirty-day-price @app-state)}]]]
-     [:div.form-group
-      [:label.col-sm-4.control-label {:for "forty-trip-price"} "40 Trip Price:"]
-      [:div.input-group.col-sm-7
-       [:span.input-group-addon "$"]
-       [:input.form-control {:type "number" :value (:forty-trip-price @app-state)}]]]
-     [:div.form-group
-      [:label.col-sm-4.control-label {:for "vacation"} "Vacation:"]
-      [:div.input-group.col-sm-7
-       [:input.form-control {:type "date"}]
-       [:span.input-group-addon
-        [:button {:type "button"} "Add"]]]
-      [:div.input-group.col-sm-7]]
-     [:div.form-group
-      [:label.col-sm-4.control-label {:for "holiday"} "Holidays:"]
-      [:div.input-group.col-sm-7
-       [:input.form-control {:type "date"}]
-       [:span.input-group-addon
-        [:button {:type "button"} "Add"]]]
-      [:div.input-group.col-sm-7
-       [:span.label.label-default "2014-01-01"]]]
-     [:div.form-group
-      [:label.col-sm-4.control-label {:for "extra-trips"} "Additional Trips:"]
-      [:div.input-group.col-sm-7
-       [:input.form-control {:type "number" :value (:additional-trips @app-state)}]]]]]
+     (input {:label "Start Date" :id "start-date"
+             :type "date" :value (:start-date @app-state)})
+     (input {:label "30 Day Price" :id "thirty-day-price" :pre "$"
+             :type "number" :value (:thirty-day-price @app-state)})
+     (input {:label "40 Trip Price" :id "forty-trip-price" :pre "$"
+             :type "number" :value (:forty-trip-price @app-state)})
+     (input {:label "Vacation" :id "vacation"
+             :type "date" :post [:button {:type "button"} "Add"]})
+     [:div.input-group.col-sm-7
+      [:span.label.label-default "2014-01-01"]]
+     (input {:label "Holidays" :id "holiday"
+             :type "date" :post [:button {:type "button"} "Add"]})
+     [:div.input-group.col-sm-7
+      [:span.label.label-default "2014-01-01"]]
+     (input {:label "Additional Trips" :id "extra-trips"
+             :type "number" :value (:additional-trips @app-state)})]]
    [:div.output
     [:div.form-horizontal
-     [:div.form-group
-      [:label.col-sm-4.control-label "$/Day 30 Day"]
-      [:div.input-group.col-sm-7
-       [:span.input-group-addon "$"]
-       [:p.form-control-static @thirty-day-result]]]
-     [:div.form-group
-      [:label.col-sm-4.control-label "$/Day 40 Trip"]
-      [:div.input-group.col-sm-7
-       [:span.input-group-addon "$"]
-       [:p.form-control-static @forty-trip-result]]]
-     [:div.form-group
-      [:label.col-sm-4.control-label "$/Trip 30 Day"]
-      [:div.input-group.col-sm-7
-       [:span.input-group-addon "$"]
-       [:p.form-control-static @thirty-day-result-trip]]]
-     [:div.form-group
-      [:label.col-sm-4.control-label "$/Trip 40 Trip"]
-      [:div.input-group.col-sm-7
-       [:span.input-group-addon "$"]
-       [:p.form-control-static @forty-trip-result-trip]]]
-     [:div.form-group
-      [:label.col-sm-4.control-label "Last Day 30 Day"]
-      [:div.input-group.col-sm-7
-       [:p.form-control-static @last-day-thirty-day]]]
-     [:div.form-group
-      [:label.col-sm-4.control-label "Last Day 40 Trip"]
-      [:div.input-group.col-sm-7
-       [:p.form-control-static @last-day-forty-trip]]]]]])
+     (input {:label "$/Day 30 Day" :pre "$"
+             :value @thirty-day-result :read-only? true})
+     (input {:label "$/Day 40 Trip" :pre "$"
+             :value @forty-trip-result :read-only? true})
+     (input {:label "$/Trip 30 Day" :pre "$"
+             :value @thirty-day-result-trip :read-only? true})
+     (input {:label "$/Trip 40 Trip" :pre "$"
+             :value @forty-trip-result-trip :read-only? true})
+     (input {:label "Last Day 30 Day"
+             :value @last-day-thirty-day :read-only? true})
+     (input {:label "Last Day 40 Trip"
+             :value @last-day-forty-trip :read-only? true})]]])
 
 (defn mount-root []
   (reagent/render-component
