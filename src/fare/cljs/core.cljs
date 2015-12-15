@@ -3,9 +3,16 @@
             [fare.state :as s]
             [fare.calc :as c]
             [reagent.core :as reagent]
+            [re-frame.core :as re]
             [goog.date :as date]))
 
 (enable-console-print!)
+
+(re/register-handler
+ :initialize
+ re/debug
+ (fn [db _]
+   (merge db s/initial-state)))
 
 (defn input [{:keys [pre label id type value post read-only?] :as opts}]
   [:div.form-group
@@ -54,8 +61,9 @@
              :value @c/last-day-forty-trip :read-only? true})]]])
 
 (defn mount-root []
+  (re/dispatch-sync [:initialize])
   (reagent/render-component
    [root]
-   (. js/document (getElementById "app")))  )
+   (. js/document (getElementById "app"))))
 
 (mount-root)
