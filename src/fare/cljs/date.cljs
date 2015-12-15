@@ -16,7 +16,6 @@
 
 
 (defn is-weekday? [d]
-  (println "is-weekday" d)
   (not (contains? #{5 6} (.getIsoWeekday d))))
 
 (defn is-not-holiday? [d state]

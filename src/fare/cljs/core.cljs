@@ -16,19 +16,16 @@
 
 (re/register-handler
  :field-change
- re/debug
  (fn [db [_ field value]]
    (assoc db field value)))
 
 (re/register-handler
  :add-day
- re/debug
  (fn [db [_ field day]]
    (update db field conj day)))
 
 (re/register-handler
  :remove-day
- re/debug
  (fn [db [_ field day]]
    (update db field disj day)))
 
@@ -101,7 +98,8 @@
          [:div.form-group
           [:div.col-sm-4]
           [:div.input-group.col-sm-7
-           (map (date-pill :vacation-list) (:vacation-list @app-state))]]
+           (map (date-pill :vacation-list)
+                (sort (:vacation-list @app-state)))]]
          (input {:label "Holidays" :id "holiday" :placeholder "yyyy-mm-dd"
                  :value (:holiday @app-state)
                  :post [:button {:on-click
@@ -112,7 +110,8 @@
          [:div.form-group
           [:div.col-sm-4]
           [:div.input-group.col-sm-7
-           (map (date-pill :holiday-list) (:holiday-list @app-state))]]
+           (map (date-pill :holiday-list)
+                (sort (:holiday-list @app-state)))]]
          (input {:label "Additional Trips" :id "extra-trips"
                  :type "number" :value (:extra-trips @app-state)})]]
        [:div.output

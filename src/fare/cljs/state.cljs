@@ -11,7 +11,7 @@
    :vacation ""
    :holiday ""
    :vacation-list #{}
-   :holiday-list #{"2015-12-24" "2015-12-25" "2016-01-04"}
+   :holiday-list #{"2015-12-24" "2015-12-25" "2016-01-04" "2016-01-18"}
    :extra-trips 0})
 
 (defn load [state]
