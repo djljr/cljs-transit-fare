@@ -1,0 +1,31 @@
+.output { 
+    border: 1px solid #e1e1e8;
+    background-color: #f7f7f9;
+    border-radius: 0 0 4px 4px;
+    border-top: none;
+    padding: 9px 14px;
+    margin: -15px -15px -15px;
+}
+.inputs {
+    border: 1px solid #ddd;
+    background-color: #fff;
+    border-radius: 4px 4px 0 0;
+    padding: 40px 15px 15px;
+    margin: 0 -15px 15px;
+}
+.form-control-static {
+    padding: 6px 12px;
+    background-color: #eee;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    border-bottom-left-radius: 0;
+    border-top-left-radius: 0;
+}
+.label {
+    margin-right: 4px;
+    margin-top: 4px;
+    display: inline-block;
+}
+#vacation-days {
+    padding-top: 10px;
+}
