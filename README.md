@@ -1,3 +1,5 @@
+http://djljr.github.io/cljs-transit-fare/
+
 Development
 ===========
 
