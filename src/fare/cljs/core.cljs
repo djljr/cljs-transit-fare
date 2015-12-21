@@ -1,18 +1,12 @@
 (ns fare.core
   (:require-macros [reagent.ratom :refer [reaction]])
-  (:require [fare.date :as d]
-            [fare.state :as s]
-            [fare.calc :as c]
+  (:require [fare.date]
+            [fare.state]
+            [fare.calc]
             [reagent.core :as reagent]
-            [re-frame.core :as re]
-            [goog.date :as date]))
+            [re-frame.core :as re]))
 
 (enable-console-print!)
-
-(re/register-handler
- :initialize
- (fn [db _]
-   (merge db s/initial-state)))
 
 (re/register-handler
  :field-change

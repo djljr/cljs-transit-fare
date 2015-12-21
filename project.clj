@@ -20,10 +20,10 @@
                              [figwheel-sidecar "0.5.0-2"]]}
              :repl {:plugins [[cider/cider-nrepl "0.9.1"]
                               [refactor-nrepl "1.1.0"]]}}
-  
+
   :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
 
-  :cljsbuild { 
+  :cljsbuild {
               :builds {:dev
                        {:source-paths ["src"]
                         :figwheel {:on-jsload "fare.core/mount-root"}
@@ -36,7 +36,7 @@
                        {:source-paths ["src"]
                         :compiler {:main fare.core
                                    :output-to "resources/public/js/compiled/fare.js"
-                                   :optimizations :whitespace
+                                   :optimizations :advanced
                                    :pretty-print false}}}}
-  
+
   :figwheel {:css-dirs ["resources/public/css"]})
